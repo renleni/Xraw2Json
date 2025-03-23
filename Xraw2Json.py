@@ -5,6 +5,7 @@ import json
 # plt支持中文
 plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
+
 # raw数据读取,分别提取出低能本底数据，高能本底数据，低能满载数据，高能满载数据
 def read_data(file_path , detector_num, single_channel = False):
     # 获取文件大小
@@ -37,12 +38,7 @@ def calculate_mean(img):
     for i in range(img.shape[1]):
         mean_list.append(np.mean(img[:, i]))
     return mean_list
-# # 创建界面
-# CurveSave = gr.Interface(
-#     fn=calculate_mean,
-#     inputs=gr.inputs.File(label="上传CSV文件"),
-#     outputs=gr.outputs.Image(type="filepath", label="生成的曲线图"),
-# )
+
 if __name__ == '__main__':
     # 读取文件夹下面的所有文件，并绘制图像
     file_folder = "./TEST"
@@ -76,11 +72,4 @@ if __name__ == '__main__':
         # X轴上每个值都画出虚线
         # plt.vlines(np.arange(0, 64 * (detector_num + 1), 64), 0, 65535, linestyles='dashed')
         plt.show()
-        # 将mean_low_air_block、residual_low_list等数据以新文件写入curve_criteria.csv文件中
-        with open('curve_criteria.csv', 'w', newline='') as f:
-            writer = csv.writer(f)
-            if single_channel == False:
-                writer.writerow([file_name, mean_low_air_block, mean_high_air_block])
-            else:
-                writer.writerow([file_name, mean_low_air_block])
-    # CurveSave.launch()
+
