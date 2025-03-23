@@ -2,15 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import json
-# pltÖ§³ÖÖĞÎÄ
+# pltæ”¯æŒä¸­æ–‡
 plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
 
-# rawÊı¾İ¶ÁÈ¡,·Ö±ğÌáÈ¡³öµÍÄÜ±¾µ×Êı¾İ£¬¸ßÄÜ±¾µ×Êı¾İ£¬µÍÄÜÂúÔØÊı¾İ£¬¸ßÄÜÂúÔØÊı¾İ
+# rawæ•°æ®è¯»å–,åˆ†åˆ«æå–å‡ºä½èƒ½æœ¬åº•æ•°æ®ï¼Œé«˜èƒ½æœ¬åº•æ•°æ®ï¼Œä½èƒ½æ»¡è½½æ•°æ®ï¼Œé«˜èƒ½æ»¡è½½æ•°æ®
 def read_data(file_path , detector_num, single_channel = False):
-    # »ñÈ¡ÎÄ¼ş´óĞ¡
+    # è·å–æ–‡ä»¶å¤§å°
     file_size = os.path.getsize(file_path)
-    # ¸ù¾İÎÄ¼ş´óĞ¡¼ÆËãoffset
+    # æ ¹æ®æ–‡ä»¶å¤§å°è®¡ç®—offset
     if single_channel == True:
         offset = file_size - 400 * detector_num * 64 * 2 
     else:
@@ -18,7 +18,7 @@ def read_data(file_path , detector_num, single_channel = False):
     img = np.fromfile(file_path, dtype=np.uint16, offset = offset) 
     if single_channel == False:
         img_width = int((file_size - offset) // 400 // 2)
-        # ¼ÆËãÍ¼Ïñ´óĞ¡
+        # è®¡ç®—å›¾åƒå¤§å°
         img = img.reshape((400, img_width))
         img_low_base = img[0:199, : img_width // 2]
         img_high_base = img[0:199, img_width // 2:]
@@ -27,12 +27,12 @@ def read_data(file_path , detector_num, single_channel = False):
         return img_low_base, img_high_base, img_low_full, img_high_full
     else:
         img_width = int((file_size - offset) // 400 // 2)
-        # ¼ÆËãÍ¼Ïñ´óĞ¡
+        # è®¡ç®—å›¾åƒå¤§å°
         img = img.reshape((400, img_width))
         img_low_base = img[0:199, :]
         img_low_full = img[200:400, :]
         return img_low_base, img_low_full
-# °´ÕÕ¼ÆËãÃ¿ÁĞÊı¾İµÄÆ½¾ùÖµ£¬²¢Êä³ö
+# æŒ‰ç…§è®¡ç®—æ¯åˆ—æ•°æ®çš„å¹³å‡å€¼ï¼Œå¹¶è¾“å‡º
 def calculate_mean(img):
     mean_list = []
     for i in range(img.shape[1]):
@@ -40,14 +40,14 @@ def calculate_mean(img):
     return mean_list
 
 if __name__ == '__main__':
-    # ¶ÁÈ¡ÎÄ¼ş¼ĞÏÂÃæµÄËùÓĞÎÄ¼ş£¬²¢»æÖÆÍ¼Ïñ
+    # è¯»å–æ–‡ä»¶å¤¹ä¸‹é¢çš„æ‰€æœ‰æ–‡ä»¶ï¼Œå¹¶ç»˜åˆ¶å›¾åƒ
     file_folder = "./TEST"
     file_list = os.listdir(file_folder)
     single_channel = True
     detector_num = 7
-    # »æÖÆÍ¼Ïñ£¬²¢¶¼ÔÚÒ»¸öÍ¼ÏñÖĞÕ¹Ê¾
+    # ç»˜åˆ¶å›¾åƒï¼Œå¹¶éƒ½åœ¨ä¸€ä¸ªå›¾åƒä¸­å±•ç¤º
     plt.figure(figsize=(10, 6))
-    # ±£´æÃ¿¸öÎÄ¼ş¶ÔÓ¦µÄÊı¾İ
+    # ä¿å­˜æ¯ä¸ªæ–‡ä»¶å¯¹åº”çš„æ•°æ®
     for file_name in file_list:
         file_path = os.path.join(file_folder, file_name)
         if single_channel == False:
@@ -67,9 +67,9 @@ if __name__ == '__main__':
             mean_low_air_block = [np.mean(mean_low_air[i * 64: (i + 1) * 64]) for i in range(detector_num)]
             mean_low_air[190] = 7500
             plt.plot(mean_low_air, label=file_name)
-        # Ìí¼ÓÍ¼Àı
+        # æ·»åŠ å›¾ä¾‹
         plt.legend()
-        # XÖáÉÏÃ¿¸öÖµ¶¼»­³öĞéÏß
+        # Xè½´ä¸Šæ¯ä¸ªå€¼éƒ½ç”»å‡ºè™šçº¿
         # plt.vlines(np.arange(0, 64 * (detector_num + 1), 64), 0, 65535, linestyles='dashed')
         plt.show()
 
