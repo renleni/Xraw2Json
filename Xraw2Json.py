@@ -6,7 +6,7 @@ import json
 plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
 # raw数据读取,分别提取出低能本底数据，高能本底数据，低能满载数据，高能满载数据
-def read_data(file_path , detector_num, single_channel = False):
+def read_xraw(file_path , detector_num, single_channel = False):
     # 获取文件大小
     file_size = os.path.getsize(file_path)
     # 根据文件大小计算offset
@@ -37,12 +37,7 @@ def calculate_mean(img):
     for i in range(img.shape[1]):
         mean_list.append(np.mean(img[:, i]))
     return mean_list
-# # 创建界面
-# CurveSave = gr.Interface(
-#     fn=calculate_mean,
-#     inputs=gr.inputs.File(label="上传CSV文件"),
-#     outputs=gr.outputs.Image(type="filepath", label="生成的曲线图"),
-# )
+
 if __name__ == '__main__':
     # 读取文件夹下面的所有文件，并绘制图像
     file_folder = "./TEST"
@@ -55,7 +50,7 @@ if __name__ == '__main__':
     for file_name in file_list:
         file_path = os.path.join(file_folder, file_name)
         if single_channel == False:
-            img_low_base, img_high_base, img_low_full, img_high_full = read_data(file_path , detector_num , single_channel )
+            img_low_base, img_high_base, img_low_full, img_high_full = read_xraw(file_path , detector_num , single_channel )
             mean_low_base = calculate_mean(img_low_base)
             mean_high_base = calculate_mean(img_high_base)
             mean_low_air = calculate_mean(img_low_full)
@@ -65,7 +60,7 @@ if __name__ == '__main__':
             plt.plot(mean_low_air, label=file_name)
             plt.plot(mean_high_air, label=file_name)
         else:
-            img_low_base, img_low_full = read_data(file_path , detector_num , single_channel )
+            img_low_base, img_low_full = read_xraw(file_path , detector_num , single_channel )
             mean_low_base = calculate_mean(img_low_base)
             mean_low_air = calculate_mean(img_low_full)
             mean_low_air_block = [np.mean(mean_low_air[i * 64: (i + 1) * 64]) for i in range(detector_num)]
