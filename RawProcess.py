@@ -1,36 +1,69 @@
 import os
+import numpy as np
+
 def process_raw_files(folder_path):
     if not os.path.exists(folder_path):
-        print(f"ÎÄ¼ş¼Ğ {folder_path} ²»´æÔÚ")
+        print(f"æ–‡ä»¶å¤¹ {folder_path} ä¸å­˜åœ¨")
         return
-    # ±éÀúÎÄ¼ş¼ĞÖĞµÄËùÓĞÎÄ¼ş
+    # éå†æ–‡ä»¶å¤¹ä¸­çš„æ‰€æœ‰æ–‡ä»¶
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
         
-        # »ñÈ¡ÎÄ¼ş´óĞ¡
+        # è·å–æ–‡ä»¶å¤§å°
         file_size = os.path.getsize(file_path)
         
-        # Ä¬ÈÏÍ¼Ïñ¿í¶È
+        # é»˜è®¤å›¾åƒå®½åº¦
         width = 2304
         
-        # ¼ÆËãÍ¼Ïñ¸ß¶È
+        # è®¡ç®—å›¾åƒé«˜åº¦
         height = file_size // (width * 2)
         
-        # ¹¹½¨ĞÂµÄÎÄ¼şÃû
+        # æ„å»ºæ–°çš„æ–‡ä»¶å
         new_filename = f'xraw_{width}x{height}x2.raw'
         new_file_path = os.path.join(folder_path, new_filename)
         
-        # ÖØÃüÃûÎÄ¼ş,Èô´æÔÚÏàÍ¬ÎÄ¼şÃû£¬ÔòÌí¼ÓÊı×Ö
+        # é‡å‘½åæ–‡ä»¶,è‹¥å­˜åœ¨ç›¸åŒæ–‡ä»¶åï¼Œåˆ™æ·»åŠ æ•°å­—
         i = 1
         while os.path.exists(new_file_path):
             new_filename = f'xraw_{width}x{height}x2_{i}.raw'
             new_file_path = os.path.join(folder_path, new_filename)
             i += 1
         
-        # ÖØÃüÃûÎÄ¼ş
+        # é‡å‘½åæ–‡ä»¶
         os.rename(file_path, new_file_path)
-        print(f"ÎÄ¼ş {filename} ÖØÃüÃûÎª {new_filename}")
-# Æ´½ÓxrawÊı¾İ
+        print(f"æ–‡ä»¶ {filename} é‡å‘½åä¸º {new_filename}")
 
-# Ê¹ÓÃÊ¾Àı
+# è¯»å–xrawæ•°æ®ï¼Œå¹¶ä¿å­˜ä¸ºé«˜èƒ½æ•°æ®å’Œä½èƒ½æ•°æ®ï¼Œç„¶åå°†æ‰€æœ‰æ–‡ä»¶å¤¹ä¸­çš„xrawæ•°æ®çš„é«˜èƒ½æ•°æ®éƒ½è‡ªä¸Šè€Œä¸‹æ‹¼æ¥åœ¨ä¸€èµ·ï¼Œä½èƒ½æ•°æ®ä¹Ÿä¸€æ ·
+def read_data(folder_path):
+    # é¢„å®šä¹‰é«˜èƒ½æœ€ç»ˆæ‹¼æ¥æ•°æ®å’Œä½èƒ½æœ€ç»ˆæ‹¼æ¥æ•°æ®
+    img_high_final = np.empty((0, 1152), dtype=np.uint16)  # åˆå§‹ä¸ºç©ºæ•°ç»„
+    img_low_final = np.empty((0, 1152), dtype=np.uint16)   # åˆå§‹ä¸ºç©ºæ•°ç»„
+
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        if os.path.isfile(file_path) and filename.startswith('xraw_'):
+            with open(file_path, 'rb') as f:
+                file_size = os.path.getsize(file_path)
+                width = 2304
+                height = file_size // (width * 2)
+
+                img = np.fromfile(file_path, dtype=np.uint16, count=width*height)
+                img = img.reshape((height, width))
+
+                img_high = img[0:height, :1152]
+                img_low = img[0:height, 1152:]
+                
+                # å°†æ¯ä¸ªæ–‡ä»¶è¯»å–çš„img_highè¿›è¡Œæ‹¼æ¥
+                img_high_final = np.concatenate((img_high_final, img_high), axis=0)
+                img_low_final = np.concatenate((img_low_final, img_low), axis=0)
+                
+    # å°†img_high_finalå’Œimg_low_finalè¿›è¡Œæ‹¼æ¥
+    img_final = np.concatenate((img_high_final, img_low_final), axis=0)
+    return img_final
+
+# ä½¿ç”¨ç¤ºä¾‹
 folder_path = "./"
+
+# xrawæ‹¼æ¥æ•°æ®
+img = read_data(folder_path)
+img.tofile('xraw_final.raw')
